@@ -1,4 +1,4 @@
-Deployed at [pure-stone-1987.heroku.com](http://www.pure-stone-1987.heroku.com/)
+Deployed at [pure-stone-1987.heroku.com](http://pure-stone-1987.heroku.com/)
 
 # Ruby on Rails Tutorial: sample application
 
