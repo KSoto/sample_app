@@ -1,5 +1,7 @@
 SampleApp::Application.routes.draw do
-  get "users/new"
+  #get "users/new"
+
+  resources :users #allows for REST-style users URL (users/1 goes to users#show)
 
   match '/signup',  :to => 'users#new'
   
