@@ -11,4 +11,7 @@
 
 class User < ActiveRecord::Base
 	attr_accessible :name, :email #makes only name and email editable from the outside
+
+  validates :name,  :presence => true
+  validates :email, :presence => true
 end
