@@ -78,3 +78,4 @@ email_regex = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
       Digest::SHA2.hexdigest(string)
     end
 end
+
