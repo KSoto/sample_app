@@ -9,7 +9,9 @@
     <td class="sidebar round">
       <strong>Name</strong> <%= @user.name %><br />
       <strong>URL</strong>  <%= link_to user_path(@user), @user %><br />
-      <strong>Time of Last Login:</strong> <%= @user.updated_at %><br />
+      <!-- Got difference between hours code from http://stackoverflow.com/questions/736253/rails-time-difference-in-hours -->
+      <strong>Last Account Activity:</strong> <%= (((Time.new) - (@user.updated_at)) / 3600).round(2) %> hour(s) ago
+      <br />
     </td>
   </tr>
 </table>
