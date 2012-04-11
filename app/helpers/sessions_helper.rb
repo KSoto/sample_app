@@ -2,7 +2,7 @@ module SessionsHelper
 
   
   def sign_in_temporary(user)
-    cookies.permanent.signed[:remember_token] = [user.id, user.salt]
+    cookies.signed[:remember_token] = [user.id, user.salt]
     self.current_user = user
     #just use sessions 
           #OR 
@@ -10,8 +10,8 @@ module SessionsHelper
   end
   
   def sign_in_permanent(user)
-    cookies.permanent.signed[:remember_token] = [user.id, user.salt]
-    self.current_user = user
+      cookies.permanent.signed[:remember_token] = [user.id, user.salt]
+      self.current_user = user
     #use cookies
   end
 
@@ -21,7 +21,7 @@ module SessionsHelper
   end
 
 def current_user
-    @current_user ||= user_from_remember_token
+      @current_user ||= user_from_remember_token
   end
 
 def signed_in?
