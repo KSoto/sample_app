@@ -13,6 +13,9 @@ class SessionsController < ApplicationController
       render 'new'
     else
       sign_in user
+      #if ((params[:remember_me])!="1")
+      #    flash[:success] = "HEY**********************************************"
+      #end
       redirect_to user
     end
   end

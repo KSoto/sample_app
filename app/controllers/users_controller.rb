@@ -11,9 +11,9 @@ class UsersController < ApplicationController
   end
     
   def create
-	#create a new user with all data received from form (in params)
+	#create a new user with the data received from form except for the "remember_me" param
     @user = User.new(params[:user])
-	#once @user is defined properly, calling @user.save is all that’s needed to complete the registration
+	#once @user is defined properly, calling @user.save is all thatï¿½s needed to complete the registration
     if @user.save
       # Handle a successful save.
 	  sign_in @user
