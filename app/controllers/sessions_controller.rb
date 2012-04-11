@@ -12,10 +12,14 @@ class SessionsController < ApplicationController
       @title = "Sign in"
       render 'new'
     else
-      sign_in user
-      #if ((params[:remember_me])!="1")
-      #    flash[:success] = "HEY**********************************************"
-      #end
+      #sign in the user, depending on if they want to be remembered or not
+      if ((params[:remember_me])=="1")
+          flash[:success] = "You chose to be remembered, I will remember you"
+          sign_in_permanent user
+      else
+          flash[:success] = "You chose NOT to be remembered, I NOT will remember you"
+          sign_in_temporary user
+      end
       redirect_to user
     end
   end
