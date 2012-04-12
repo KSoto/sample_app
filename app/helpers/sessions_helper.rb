@@ -4,6 +4,7 @@ module SessionsHelper
   def sign_in_temporary(user)
     cookies.signed[:remember_token] = [user.id, user.salt]
     self.current_user = user
+    user.touch
     #just use sessions 
           #OR 
     #use cookies, but don't set "expired at" so that the cookie will automatically be deleted upon browser exit
@@ -12,6 +13,7 @@ module SessionsHelper
   def sign_in_permanent(user)
       cookies.permanent.signed[:remember_token] = [user.id, user.salt]
       self.current_user = user
+      user.touch
     #use cookies
   end
 
