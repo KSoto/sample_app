@@ -1,20 +1,8 @@
 module SessionsHelper
 
-  
-  def sign_in_temporary(user)
-    cookies.signed[:remember_token] = [user.id, user.salt]
+  def sign_in(user)
+    cookies.permanent.signed[:remember_token] = [user.id, user.salt]
     self.current_user = user
-    user.touch
-    #just use sessions 
-          #OR 
-    #use cookies, but don't set "expired at" so that the cookie will automatically be deleted upon browser exit
-  end
-  
-  def sign_in_permanent(user)
-      cookies.permanent.signed[:remember_token] = [user.id, user.salt]
-      self.current_user = user
-      user.touch
-    #use cookies
   end
 
 #special syntax for defining an assignment
@@ -35,6 +23,21 @@ def sign_out
     self.current_user = nil
   end
 
+#is the current user in the params match the current user object?
+def current_user?(user)
+    user == current_user
+  end
+
+def deny_access
+    store_location
+    redirect_to signin_path, :notice => "Please sign in to access this page."
+  end
+  
+def redirect_back_or(default)
+    redirect_to(session[:return_to] || default)
+    clear_return_to
+  end  
+  
   private
 
     def user_from_remember_token
@@ -43,6 +46,14 @@ def sign_out
 
     def remember_token
       cookies.signed[:remember_token] || [nil, nil]
+    end
+    
+    def store_location
+      session[:return_to] = request.fullpath
+    end
+
+    def clear_return_to
+      session[:return_to] = nil
     end
 
 end
