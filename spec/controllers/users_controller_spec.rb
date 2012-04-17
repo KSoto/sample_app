@@ -103,37 +103,33 @@ describe "GET 'index'" do
   end
   
  #test for the signup form (8.2.1)
- describe "POST 'create'" do
+describe "POST 'create'" do
 
-    #test for failure (8.2.1)
     describe "failure" do
-
+      
       before(:each) do
         @attr = { :name => "", :email => "", :password => "",
                   :password_confirmation => "" }
       end
+      
+      it "should have the right title" do
+        post :create, :user => @attr
+        response.should have_selector('title', :content => "Sign up")
+      end
 
-	  #verify that a failed create action doesn�t create a user in the database
+      it "should render the 'new' page" do
+        post :create, :user => @attr
+        response.should render_template('new')
+      end
+
       it "should not create a user" do
         lambda do
           post :create, :user => @attr
         end.should_not change(User, :count)
       end
-
-      it "should have the right title" do
-        post :create, :user => @attr
-        response.should have_selector("title", :content => "Sign up")
-      end
-
-	  #check that a failed signup attempt just re-renders the new user page (8.2.1)
-      it "should render the 'new' page" do
-        post :create, :user => @attr
-        response.should render_template('new')
-      end
     end
-	
-	#test for success
-	describe "success" do
+
+    describe "success" do
 
       before(:each) do
         @attr = { :name => "New User", :email => "user@example.com",
@@ -145,26 +141,24 @@ describe "GET 'index'" do
           post :create, :user => @attr
         end.should change(User, :count).by(1)
       end
-
+      
       it "should redirect to the user show page" do
         post :create, :user => @attr
         response.should redirect_to(user_path(assigns(:user)))
-      end 
+      end
 
-	it "should sign the user in" do
+      it "should have a welcome message" do
+        post :create, :user => @attr
+        flash[:success].should =~ /welcome to the sample app/i
+      end
+      
+      it "should sign the user in" do
         post :create, :user => @attr
         controller.should be_signed_in
       end
-
-	  
-	  #tests flash (8.3.3)
-	  it "should have a welcome message" do
-        post :create, :user => @attr
-        flash[:success].should =~ /welcome to the sample app/i
-      end	  
     end
-	
   end
+  
   describe "GET 'edit'" do
 
     before(:each) do
@@ -228,4 +222,46 @@ describe "authentication of edit/update pages" do
     end
     
   end
+  
+ describe "DELETE 'destroy'" do
+
+    before(:each) do
+      @user = Factory(:user)
+    end
+
+    describe "as a non-signed-in user" do
+      it "should deny access" do
+        delete :destroy, :id => @user
+        response.should redirect_to(signin_path)
+      end
+    end
+
+    describe "as a non-admin user" do
+      it "should protect the page" do
+        test_sign_in(@user)
+        delete :destroy, :id => @user
+        response.should redirect_to(root_path)
+      end
+    end
+
+    describe "as an admin user" do
+
+      before(:each) do
+        admin = Factory(:user, :email => "admin@example.com", :admin => true)
+        test_sign_in(admin)
+      end
+
+      it "should destroy the user" do
+        lambda do
+          delete :destroy, :id => @user
+        end.should change(User, :count).by(-1)
+      end
+
+      it "should redirect to the users page" do
+        delete :destroy, :id => @user
+        response.should redirect_to(users_path)
+      end
+    end #end describe as an admin
+  end #end describe delete destroy
+
 end

@@ -38,7 +38,7 @@ email_regex = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
 
    #method to compare password given in form with password in database (7.2 & 7.2.3)
    # Return true if the user's password matches the submitted password.
-	#It’s also important to note the use of the has_password? boolean. 
+	#Itï¿½s also important to note the use of the has_password? boolean. 
 	#This ensures that the salt gets reset whenever the user changes his password.
   def has_password?(submitted_password)
     # Compare encrypted_password with the encrypted version of
@@ -52,14 +52,14 @@ email_regex = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
     return nil  if user.nil?
     return user if user.has_password?(submitted_password)
    end
-  private
 
   #9.3.3
   def self.authenticate_with_salt(id, cookie_salt)
     user = find_by_id(id)
     (user && user.salt == cookie_salt) ? user : nil
   end
-
+  
+  private
     #method to perform encryption, gets called by before_save (7.1)
     def encrypt_password
       self.salt = make_salt unless has_password?(password)
@@ -71,7 +71,7 @@ email_regex = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
     def encrypt(string)
 	#store passwords with the timestamp first, then password (encrpyted)
       secure_hash("#{salt}--#{string}")
-	#Since we’re inside the User class, Ruby knows that salt refers to the user’s salt attribute.
+	#Since weï¿½re inside the User class, Ruby knows that salt refers to the userï¿½s salt attribute.
     end
 
     #7.2.3

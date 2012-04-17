@@ -1,7 +1,8 @@
 class UsersController < ApplicationController
-  before_filter :authenticate, :only => [:index, :edit, :update]
+  before_filter :authenticate, :only => [:index, :edit, :update, :destroy]
   #only you can edit your profile info
   before_filter :correct_user, :only => [:edit, :update]
+  before_filter :admin_user,   :only => :destroy
   
   def index
     @title = "All users"
@@ -14,7 +15,7 @@ class UsersController < ApplicationController
   end
 
   def new
-	@user = User.new
+	  @user = User.new
     @title = "Sign up"
   end
     
@@ -24,12 +25,12 @@ class UsersController < ApplicationController
 	#once @user is defined properly, calling @user.save is all that�s needed to complete the registration
     if @user.save
       # Handle a successful save.
-	  sign_in @user
-	  flash[:success] = "Welcome to the Sample App!"
-	  redirect_to @user
-	  #could have also said redirect_to user_path(@user)
+  	  sign_in @user
+  	  flash[:success] = "Welcome to the Sample App!"
+  	  redirect_to @user
+  	  #could have also said redirect_to user_path(@user)
     else
-	#re-render the signup page if invalid signup data is received.
+	    #re-render the signup page if invalid signup data is received.
       @title = "Sign up"
       render 'new'
     end
@@ -52,6 +53,11 @@ class UsersController < ApplicationController
     end
   end
 
+  def destroy
+    User.find(params[:id]).destroy
+    flash[:success] = "User destroyed."
+    redirect_to users_path
+  end
   
   private
 
@@ -62,5 +68,9 @@ class UsersController < ApplicationController
     def correct_user
       @user = User.find(params[:id])
       redirect_to(root_path) unless current_user?(@user)
+    end
+    
+    def admin_user
+      redirect_to(root_path) unless current_user.admin?
     end
 end
