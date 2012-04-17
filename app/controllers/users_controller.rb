@@ -1,7 +1,12 @@
 class UsersController < ApplicationController
-  before_filter :authenticate, :only => [:edit, :update]
+  before_filter :authenticate, :only => [:index, :edit, :update]
   #only you can edit your profile info
   before_filter :correct_user, :only => [:edit, :update]
+  
+  def index
+    @title = "All users"
+    @users = User.paginate(:page => params[:page])
+  end
   
   def show
     @user = User.find(params[:id])
