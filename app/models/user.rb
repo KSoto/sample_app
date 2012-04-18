@@ -2,18 +2,21 @@
 #
 # Table name: users
 #
-#  id         :integer         not null, primary key
-#  name       :string(255)
-#  email      :string(255)
-#  created_at :datetime
-#  updated_at :datetime
+#  id                 :integer         not null, primary key
+#  name               :string(255)
+#  email              :string(255)
+#  created_at         :datetime
+#  updated_at         :datetime
+#  encrypted_password :string(255)
+#  salt               :string(255)
+#  admin              :boolean         default(FALSE)
 #
 
 class User < ActiveRecord::Base
 	#use attr_accessor :password to create a virtual password attribute
 	attr_accessor :password
 	#only the following attributes are writeable from the outside:
-	attr_accessible :name, :email, :password, :password_confirmation 
+	attr_accessible :name, :email, :password, :password_confirmation, :public
 
 email_regex = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
 
@@ -84,4 +87,7 @@ email_regex = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
       Digest::SHA2.hexdigest(string)
     end
 end
+
+
+
 

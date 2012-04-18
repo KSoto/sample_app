@@ -1,3 +1,17 @@
+# == Schema Information
+#
+# Table name: users
+#
+#  id                 :integer         not null, primary key
+#  name               :string(255)
+#  email              :string(255)
+#  created_at         :datetime
+#  updated_at         :datetime
+#  encrypted_password :string(255)
+#  salt               :string(255)
+#  admin              :boolean         default(FALSE)
+#
+
 require 'spec_helper'
 
 describe UsersController do
@@ -6,26 +20,69 @@ describe UsersController do
 describe "GET 'index'" do
 
     describe "for non-signed-in users" do
-      it "should deny access" do
-        get :index
-        response.should redirect_to(signin_path)
-        flash[:notice].should =~ /sign in/i
+      before(:each) do
+        #first need to create some pretend users:
+        first = Factory(:user, :name => "Bill", :email => "another@example.org", :public => true)
+        second = Factory(:user, :name => "Bob", :email => "another@example.com", :public => true)
+        third  = Factory(:user, :name => "Ben", :email => "another@example.net", :public => false)
+        fourth  = Factory(:user, :name => "Berry", :email => "another@example.co", :public => false)
+
+        @users = [first, second, third, fourth]
       end
-    end
+      
+       it "should allow access" do
+        get :index
+        response.should be_success
+       end
+      
+      it "should only show list of public profiles" do
+         @users.each do |user|
+           if(user.public) #if it's true
+               get :index
+               response.should have_selector("li", :content => user.name)
+           elsif(!user.public) #if it's false
+               get :index
+               response.should_not have_selector("li", :content => user.name)
+           end
+          end
+       end
+
+      #this old test contradicts what we are doing now
+        #it "should deny access" do
+        #  get :index
+        #  response.should redirect_to(signin_path)
+        #  flash[:notice].sho.php~ /sign in/i
+        #end
+    end# end for non-signed in users
 
     describe "for signed-in users" do
 
       before(:each) do
         @user = test_sign_in(Factory(:user))
-        second = Factory(:user, :name => "Bob", :email => "another@example.com")
-        third  = Factory(:user, :name => "Ben", :email => "another@example.net")
+        first = Factory(:user, :name => "Bill", :email => "another@example.org", :public => true)
+        second = Factory(:user, :name => "Bob", :email => "another@example.com", :public => true)
+        third  = Factory(:user, :name => "Ben", :email => "another@example.net", :public => false)
+        fourth  = Factory(:user, :name => "Berry", :email => "another@example.co", :public => false)
 
-        @users = [@user, second, third]
+        #for pagination
+        @users = [@user, first, second, third, fourth]
         30.times do
           @users << Factory(:user, :name => Factory.next(:name),
                                    :email => Factory.next(:email))
         end
       end
+      
+       it "should only show public and private profiles" do
+         @users.each do |user|
+           if(user.public) #if it's true
+               get :index
+               response.should have_selector("li", :content => user.name)
+           elsif(!user.public) #if it's false
+               get :index
+               response.should have_selector("li", :content => user.name)
+           end
+          end
+       end
 
       it "should be successful" do
         get :index
@@ -71,6 +128,50 @@ describe "GET 'index'" do
   #tests using FactoryGirl to simulate a user instance (7.3.1)
   describe "GET 'show'" do
 
+    describe "for non-signed-in users" do
+      before(:each) do
+        #first need to create some pretend users:
+        first = Factory(:user, :name => "Bill", :email => "another@example.org", :public => true)
+        second = Factory(:user, :name => "Bob", :email => "another@example.com", :public => true)
+        third  = Factory(:user, :name => "Ben", :email => "another@example.net", :public => false)
+        fourth  = Factory(:user, :name => "Berry", :email => "another@example.co", :public => false)
+
+        @users = [first, second, third, fourth]
+      end
+      
+      it "should only show public profiles" do
+         @users.each do |user|
+           if(user.public) #if it's true
+               get :show, :id => user.id
+               response.should have_selector("li", :content => user.name)
+           elsif(!user.public) #if it's false
+               get :show, :id => user.id
+               response.should_not have_selector("li", :content => user.name)
+           end
+          end
+       end
+      end#end for non-signed in users
+
+    describe "for signed-in users" do
+      before(:each) do
+        @user = test_sign_in(Factory(:user))
+        #first need to create some pretend users:
+        first = Factory(:user, :name => "Bill", :email => "another@example.org", :public => true)
+        second = Factory(:user, :name => "Bob", :email => "another@example.com", :public => true)
+        third  = Factory(:user, :name => "Ben", :email => "another@example.net", :public => false)
+        fourth  = Factory(:user, :name => "Berry", :email => "another@example.co", :public => false)
+
+        @users = [@user, first, second, third, fourth]
+      end
+      
+      it "should show public and private profiles" do
+         @users.each do |user|
+               get :show, :id => user.id
+               response.should have_selector("li", :content => user.name)
+         end
+       end
+    end#for signed-in users
+
     before(:each) do
       @user = Factory(:user)
     end
@@ -85,8 +186,8 @@ describe "GET 'index'" do
       assigns(:user).should == @user
     end
 	
-	#Tests for the user show page (7.3.2)
-	it "should have the right title" do
+	  #Tests for the user show page (7.3.2)
+	  it "should have the right title" do
       get :show, :id => @user
       response.should have_selector("title", :content => @user.name)
     end
@@ -100,7 +201,7 @@ describe "GET 'index'" do
       get :show, :id => @user
       response.should have_selector("h1>img", :class => "gravatar")
     end
-  end
+  end#end "GET 'show'"
   
  #test for the signup form (8.2.1)
 describe "POST 'create'" do
@@ -127,7 +228,7 @@ describe "POST 'create'" do
           post :create, :user => @attr
         end.should_not change(User, :count)
       end
-    end
+    end#end failure
 
     describe "success" do
 
@@ -156,8 +257,8 @@ describe "POST 'create'" do
         post :create, :user => @attr
         controller.should be_signed_in
       end
-    end
-  end
+    end#end success
+  end#end POST 'create'
   
   describe "GET 'edit'" do
 
@@ -182,7 +283,13 @@ describe "POST 'create'" do
       response.should have_selector("a", :href => gravatar_url,
                                          :content => "change")
     end
-  end  
+    
+    #Users can mark their profiles (/users/n/edit) public or private
+    it "should have checkbox named 'public'" do
+      get :edit, :id => @user
+      response.should have_selector("input", :type => "checkbox", :name => public)
+    end 
+  end#end Get 'edit'
   
 describe "authentication of edit/update pages" do
 
@@ -201,9 +308,9 @@ describe "authentication of edit/update pages" do
         put :update, :id => @user, :user => {}
         response.should redirect_to(signin_path)
       end
-    end
+    end#end for non-signed-in users
     
-        describe "for signed-in users" do
+   describe "for signed-in users" do
 
       before(:each) do
         wrong_user = Factory(:user, :email => "user@example.net")
@@ -219,9 +326,9 @@ describe "authentication of edit/update pages" do
         put :update, :id => @user, :user => {}
         response.should redirect_to(root_path)
       end
-    end
+    end#end for signed-in users
     
-  end
+end#end authentication of edit/update pages
   
  describe "DELETE 'destroy'" do
 
@@ -264,4 +371,4 @@ describe "authentication of edit/update pages" do
     end #end describe as an admin
   end #end describe delete destroy
 
-end
+end#end describe UsersController
