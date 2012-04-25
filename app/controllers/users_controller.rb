@@ -10,22 +10,43 @@
 #  encrypted_password :string(255)
 #  salt               :string(255)
 #  admin              :boolean         default(FALSE)
+#  public             :boolean         default(TRUE)
 #
 
 class UsersController < ApplicationController
-  before_filter :authenticate, :only => [:index, :edit, :update, :destroy]
+  before_filter :authenticate, :only => [:edit, :update, :destroy] #index removed
   #only you can edit your profile info
   before_filter :correct_user, :only => [:edit, :update]
   before_filter :admin_user,   :only => :destroy
   
+  #/users
   def index
     @title = "All users"
-    @users = User.paginate(:page => params[:page])
+    if signed_in?
+      @get_Users = User.all #get public and private profiles
+    else
+      @get_Users = User.find_all_by_public(true) #just get public profiles
+    end
+    @users = @get_Users.paginate(:page => params[:page])
   end
   
+  #/users/1
   def show
-    @user = User.find(params[:id])
-	  @title = @user.name
+    if signed_in? 
+      #a signed in user can view any profile - public or private
+      @user = User.find(params[:id])
+      @title = @user.name
+    else
+      #if they are not signed in
+      if(User.find(params[:id]).public) 
+        #if the user's profile is public, then it's safe to display.
+        @user = User.find(params[:id])
+        @title = @user.name
+      else
+        #else, the user's profile is private! Deny access.
+        deny_access
+      end
+    end  
   end
 
   def new
@@ -50,6 +71,7 @@ class UsersController < ApplicationController
     end
   end 
   
+  #/users/102/edit
   def edit
     #before filer "correct_user" now defines @user so we don't need this line anymore
     #@user = User.find(params[:id])

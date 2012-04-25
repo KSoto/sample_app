@@ -64,8 +64,10 @@ describe "GET 'index'" do
         third  = Factory(:user, :name => "Ben", :email => "another@example.net", :public => false)
         fourth  = Factory(:user, :name => "Berry", :email => "another@example.co", :public => false)
 
-        #for pagination
+        
         @users = [@user, first, second, third, fourth]
+        
+        #for pagination
         30.times do
           @users << Factory(:user, :name => Factory.next(:name),
                                    :email => Factory.next(:email))
@@ -73,7 +75,7 @@ describe "GET 'index'" do
       end
       
        it "should only show public and private profiles" do
-         @users.each do |user|
+         @users[0..4].each do |user|
            if(user.public) #if it's true
                get :index
                response.should have_selector("li", :content => user.name)
@@ -96,7 +98,7 @@ describe "GET 'index'" do
 
       it "should have an element for each user" do
         get :index
-        @users[0..2].each do |user|
+        @users[0..4].each do |user|
           response.should have_selector("li", :content => user.name)
         end
       end
@@ -143,10 +145,10 @@ describe "GET 'index'" do
          @users.each do |user|
            if(user.public) #if it's true
                get :show, :id => user.id
-               response.should have_selector("li", :content => user.name)
+               response.should have_selector("h1", :content => user.name)
            elsif(!user.public) #if it's false
                get :show, :id => user.id
-               response.should_not have_selector("li", :content => user.name)
+               response.should_not have_selector("h1", :content => user.name)
            end
           end
        end
@@ -161,21 +163,28 @@ describe "GET 'index'" do
         third  = Factory(:user, :name => "Ben", :email => "another@example.net", :public => false)
         fourth  = Factory(:user, :name => "Berry", :email => "another@example.co", :public => false)
 
-        @users = [@user, first, second, third, fourth]
+        @users = [@user, first, second, third, fourth]      
+        #@user = Factory(:user)
       end
       
       it "should show public and private profiles" do
-         @users.each do |user|
+        @users[0..4].each do |user|
+           if(user.public) #if it's public
                get :show, :id => user.id
-               response.should have_selector("li", :content => user.name)
-         end
+               response.should have_selector("h1", :content => user.name)
+           elsif(!user.public) #if it's private
+               get :show, :id => user.id
+               response.should have_selector("h1", :content => user.name)
+           end
+         end  
        end
+       
     end#for signed-in users
 
     before(:each) do
       @user = Factory(:user)
     end
-
+       
     it "should be successful" do
       get :show, :id => @user
       response.should be_success
@@ -287,7 +296,7 @@ describe "POST 'create'" do
     #Users can mark their profiles (/users/n/edit) public or private
     it "should have checkbox named 'public'" do
       get :edit, :id => @user
-      response.should have_selector("input", :type => "checkbox", :name => public)
+      response.should have_selector("input", :type => "checkbox", :name => "user[public]")
     end 
   end#end Get 'edit'
   
